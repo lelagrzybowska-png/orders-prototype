@@ -131,8 +131,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .list-meta{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;font-size:13px;color:var(--ink-2);margin:0 0 10px}
 .list-meta strong{color:var(--ink);font-weight:600}
 .orders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 12px;text-decoration:none;color:inherit}
-.card:active{background:var(--pressed)}
+.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 12px;color:inherit}
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .card-name{font-size:15.5px;font-weight:600;line-height:1.3;min-width:0}
 .card-meta,.card-tests{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:0}
@@ -385,7 +384,7 @@ kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-botto
       <li><span><button class="try-chip" type="button" data-try="liver">liver</button> searches by test name.</span></li>
       <li><span>Press <kbd>Search</kbd> or <em>Show results</em> to filter the whole list.</span></li>
       <li><span>Pick a status, then search within it. <em>Clear</em> resets both.</span></li>
-      <li><span>Tap any order to see its progress and tests.</span></li>
+      <li><span>Tap a suggestion to open that order.</span></li>
     </ul>
   </section>
 </div>
@@ -655,13 +654,13 @@ kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-botto
     var o = r.o;
     var name = o.name ? hl(o.name, tokens) : "Draft order";
     var meta = o.name ? hl(o.dobText, tokens, false) + '<span class="dot">·</span>' + hlId(o, tokens) : "No patient added yet";
-    return '<li><a class="card" href="#order-' + o.key + '">' +
+    return '<li><div class="card">' +
       '<div class="card-top"><span class="card-name">' + name + '</span>' + pill(o.status) + '</div>' +
       '<div class="card-meta">' + meta + '</div>' +
       '<div class="card-tests">' + testsLine(o, r.testIdx, tokens) + '</div>' +
       flagChips(o) +
       '<div class="card-foot"><span>' + lastEvent(o) + '</span><span>Requested by ' + hl(o.clin, tokens) + '</span></div>' +
-      '</a></li>';
+      '</div></li>';
   }
   function renderList(){
     var tokens = tokenize(state.applied);
