@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>All Orders Mobile Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-column phone app. At desktop size it sits in a device frame beside a QR code and a "things to try" panel. Single light theme, matching the product design. */
+:root{
+  --brand:#1F3C7A;
+  --brand-hover:#17305F;
+  --brand-tint:#EEF2FA;
+  --ink:#1A1E27;
+  --ink-2:#4F5666;
+  --ink-3:#7C8394;
+  --line:#D9DDE4;
+  --line-2:#E9EBF0;
+  --surface:#FFFFFF;
+  --canvas:#F4F5F8;
+  --stage:#E2E6EE;
+  --hl:#D6E2F7;
+  --focus:#2F5BD3;
+  --bezel:#15171C;
+  --pressed:#F3F6FB;
+  --green-ink:#1E7340; --green-bg:#EAF6EE; --green-line:#A8D9B8;
+  --blue-ink:#2356C2;  --blue-bg:#ECF2FD;  --blue-line:#B9CDF4;
+  --violet-ink:#7240BF; --violet-bg:#F4EEFC; --violet-line:#D7C5F2;
+  --amber-ink:#A35700; --amber-bg:#FFF5E6; --amber-line:#F2CE96;
+  --red-ink:#C42B2B;   --red-bg:#FDEEEE;   --red-line:#F1B7B7;
+  --grey-ink:#3C4250;  --grey-bg:#F2F3F6;  --grey-line:#D6D9DF;
+  --font:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --r:8px;
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+mark{background:var(--hl);color:inherit;border-radius:2px;padding:0 1px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--surface)}
+.gutter{padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+
+/* ---------- Frame (phone by default, device frame on desktop) ---------- */
+.panel,.statusbar{display:none}
+.screen{max-width:560px;margin:0 auto;background:var(--canvas)}
+
+/* ---------- App bar ---------- */
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--surface);border-bottom:1px solid var(--line-2)}
+.appbar-in{height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;flex-direction:column;text-decoration:none;color:var(--brand);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.15;padding:4px 0}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border:0;background:none;border-radius:8px;color:var(--ink);margin-right:-8px}
+.icon-btn:active{background:var(--pressed)}
+
+/* ---------- Prototype note (phones) ---------- */
+.proto-note{display:flex;align-items:center;gap:10px;background:var(--brand-tint);color:var(--ink-2);font-size:13px;padding-block:9px;border-bottom:1px solid var(--line-2)}
+.proto-note p{margin:0;flex:1;min-width:0}
+.proto-note .link-btn{font-weight:600}
+.proto-note .icon-btn{width:32px;height:32px;margin-right:-6px;color:var(--ink-3)}
+
+/* ---------- List view ---------- */
+.view{padding-block:18px 32px}
+.page-title{font-size:24px;line-height:1.2;font-weight:600;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+.page-title:focus{outline:none}
+.filters{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.row{display:flex;gap:8px}
+.select-wrap{position:relative;flex:1;min-width:0}
+.select-wrap select{appearance:none;-webkit-appearance:none;width:100%;height:44px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 40px 0 12px;font-size:16px;color:var(--ink)}
+.select-wrap select.is-empty{color:var(--ink-3)}
+.select-wrap svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ink-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border-radius:6px;font-size:15px;font-weight:500;border:1px solid transparent;text-decoration:none;white-space:nowrap}
+.btn-secondary{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-secondary:active{background:var(--pressed)}
+.btn-secondary:disabled{background:var(--grey-bg);border-color:var(--line-2);color:var(--ink-3);cursor:default}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:active{background:var(--brand-hover)}
+.btn-block{width:100%}
+.link-btn{border:0;background:none;padding:0;color:var(--brand);font-size:inherit;font-weight:500;text-decoration:underline;text-underline-offset:2px}
+
+/* Search + suggestions */
+.search{position:relative}
+.search-field{display:flex;align-items:center;height:46px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 6px 0 12px;gap:8px}
+.search-field:focus-within{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.search-field svg{flex:none;color:var(--ink-3)}
+.search-field input{flex:1;min-width:0;border:0;outline:none;background:none;font-size:16px;height:100%;padding:0;-webkit-appearance:none;appearance:none}
+.search-field input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.search-field input::placeholder{color:var(--ink-3)}
+.search-go{flex:none;height:32px;padding:0 10px;border:0;border-radius:4px;background:var(--grey-bg);font-size:14px;font-weight:500;color:var(--ink)}
+.search-go:active{background:var(--line-2)}
+.suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 14px 34px -8px rgba(18,28,56,.22),0 3px 8px rgba(18,28,56,.06);overflow:hidden}
+.suggest ul{list-style:none;margin:0;padding:0}
+.opt{padding:11px 12px;border-bottom:1px solid var(--line-2);cursor:pointer;display:flex;flex-direction:column;gap:1px}
+.opt.is-active,.opt:active{background:var(--pressed)}
+@media (hover:hover){.opt:hover{background:var(--pressed)}}
+.opt-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1px}
+.opt-id{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.opt-sub{font-size:12.5px;color:var(--ink-2)}
+.opt-line{font-size:13.5px;color:var(--ink-2);margin-top:5px}
+.opt-name{color:var(--ink);font-weight:500}
+.dot{color:var(--ink-3);margin:0 6px}
+.more-n{color:var(--ink-3);white-space:nowrap}
+.suggest-foot{background:#FAFBFC;padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;font-size:12.5px;color:var(--ink-2)}
+.suggest-foot p{margin:0}
+.suggest-foot .btn{height:40px;font-size:14px}
+.foot-empty strong{display:block;color:var(--ink);font-size:13.5px;font-weight:500;margin-bottom:2px}
+
+/* Pills + flags */
+.pill{flex:none;display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:4px;border:1px solid;font-size:12px;font-weight:500;line-height:1;white-space:nowrap}
+.tone-green{color:var(--green-ink);background:var(--green-bg);border-color:var(--green-line)}
+.tone-blue{color:var(--blue-ink);background:var(--blue-bg);border-color:var(--blue-line)}
+.tone-violet{color:var(--violet-ink);background:var(--violet-bg);border-color:var(--violet-line)}
+.tone-amber{color:var(--amber-ink);background:var(--amber-bg);border-color:var(--amber-line)}
+.tone-grey{color:var(--grey-ink);background:var(--grey-bg);border-color:var(--grey-line)}
+.flags{display:flex;flex-wrap:wrap;gap:6px}
+.flag{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;border-radius:4px;border:1px solid;font-size:11.5px;font-weight:500;white-space:nowrap}
+.flag::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.flag-critical{color:var(--red-ink);background:var(--red-bg);border-color:var(--red-line)}
+.flag-amended{color:var(--blue-ink);background:var(--blue-bg);border-color:var(--blue-line)}
+
+/* List meta + cards */
+.list-meta{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;font-size:13px;color:var(--ink-2);margin:0 0 10px}
+.list-meta strong{color:var(--ink);font-weight:600}
+.orders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px 12px;text-decoration:none;color:inherit}
+.card:active{background:var(--pressed)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.card-name{font-size:15.5px;font-weight:600;line-height:1.3;min-width:0}
+.card-meta,.card-tests{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:0}
+.card-tests{color:var(--ink)}
+.sep{color:var(--ink-3)}
+.card-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;border-top:1px solid var(--line-2);padding-top:9px;margin-top:4px;font-size:12.5px;color:var(--ink-2)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:22px 18px;text-align:left;display:flex;flex-direction:column;gap:6px;align-items:flex-start;color:var(--ink-2)}
+.empty p{margin:0}
+.empty-title{color:var(--ink);font-weight:600;font-size:15px}
+.empty .btn{margin-top:6px;height:40px}
+.more{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px}
+.more-count{margin:0;font-size:13px;color:var(--ink-2)}
+
+/* ---------- Detail view ---------- */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-size:14px;font-weight:500;text-decoration:none;margin:0 0 12px -4px;padding:4px}
+.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.detail-head .page-title{margin:0}
+.detail-head .pill{margin-top:3px}
+.detail-sub{margin:6px 0 10px;color:var(--ink-2);font-size:13.5px;font-variant-numeric:tabular-nums}
+.section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+.section h2{margin:0 0 10px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;display:flex;gap:6px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin:0}
+.kv div{min-width:0}
+.kv dt{font-size:12.5px;color:var(--ink-2)}
+.kv dd{margin:1px 0 0;font-size:14.5px;font-weight:500;font-variant-numeric:tabular-nums}
+.steps{list-style:none;margin:0;padding:0}
+.step{display:grid;grid-template-columns:22px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.step:last-child{padding-bottom:0}
+.step::before{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:var(--line-2)}
+.step:last-child::before{display:none}
+.step.is-done::before{background:var(--brand)}
+.step-mark{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;position:relative;z-index:1}
+.is-done .step-mark{background:var(--brand);border-color:var(--brand);color:#fff}
+.is-partial .step-mark{border-color:var(--amber-ink);background:linear-gradient(90deg,var(--amber-ink) 50%,var(--surface) 50%)}
+.step-body{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 10px;padding-top:1px}
+.step-label{font-weight:500}
+.is-pending .step-label{color:var(--ink-3)}
+.step-when{color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums}
+.step-note{flex-basis:100%;font-size:12.5px;color:var(--amber-ink)}
+.tests{list-style:none;margin:0;padding:0}
+.tests li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line-2)}
+.tests li:first-child{border-top:0;padding-top:2px}
+.test-name{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;font-weight:500}
+.ts{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2)}
+.ts::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.ts-green{color:var(--green-ink)}
+.ts-blue{color:var(--blue-ink)}
+.ts-grey{color:var(--ink-3)}
+.count{color:var(--ink-3);font-weight:500}
+.detail-actions{margin-top:16px}
+
+/* ---------- Drawer, scrim, toast ---------- */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(17,22,34,.42);opacity:0;transition:opacity .2s ease}
+.scrim.open{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:51;width:min(320px,86%);background:var(--surface);box-shadow:-12px 0 40px rgba(17,22,34,.18);transform:translateX(100%);transition:transform .24s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;padding:calc(12px + env(safe-area-inset-top,0px)) max(18px, env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) 18px;overflow-y:auto}
+.drawer.open{transform:none}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;height:44px;margin-bottom:8px}
+.drawer-head span{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.nav{display:flex;flex-direction:column;gap:2px;margin-bottom:16px}
+.nav-item{display:flex;align-items:center;justify-content:space-between;height:46px;padding:0 12px;border:0;border-radius:6px;background:none;font-size:16px;font-weight:500;text-align:left;color:var(--ink)}
+.nav-item:active{background:var(--pressed)}
+.nav-item.is-current{background:var(--brand-tint);color:var(--brand)}
+.account{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-2)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:14px}
+.account strong{display:block;font-weight:600}
+.account span{font-size:13px;color:var(--ink-2)}
+.drawer-note{margin-top:auto;padding-top:24px;font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.drawer-note p{margin:0}
+.drawer-note strong{color:var(--ink);font-weight:600}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:60;margin:0 auto;max-width:340px;background:var(--ink);color:#fff;border-radius:8px;padding:12px 14px;font-size:14px;box-shadow:0 10px 30px rgba(17,22,34,.3);opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease}
+.toast.open{opacity:1;transform:none}
+
+/* ---------- Desktop: device frame + panel ---------- */
+@media (min-width:860px) and (min-height:640px){
+  body{background:var(--stage)}
+  body::before{display:none}
+  .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:clamp(40px,6vw,96px);padding-block:32px;padding-left:max(32px, env(safe-area-inset-left,0px));padding-right:max(32px, env(safe-area-inset-right,0px))}
+  .device{--dh:min(844px, calc(100vh - 64px));flex:none;height:var(--dh);width:calc(var(--dh) * .4621);padding:11px;border-radius:calc(var(--dh) * .066);background:var(--bezel);box-shadow:0 0 0 1px #2B2E36,0 40px 70px -30px rgba(16,24,48,.55),0 14px 28px -14px rgba(16,24,48,.35)}
+  .screen{height:100%;max-width:none;margin:0;border-radius:calc(var(--dh) * .054);overflow:hidden;display:flex;flex-direction:column;transform:translateZ(0)}
+  .statusbar{display:flex;flex:none;position:relative;height:48px;align-items:center;justify-content:space-between;padding:4px 26px 0 34px;background:var(--surface);font-size:15px;font-weight:600;color:var(--ink)}
+  .island{position:absolute;left:50%;top:10px;width:30%;height:30px;transform:translateX(-50%);background:#000;border-radius:20px}
+  .sb-icons{display:flex;align-items:center;gap:6px}
+  .scroller{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .scroller::-webkit-scrollbar{display:none}
+  .scroller.is-locked{overflow:hidden}
+  .appbar{top:0}
+  .proto-note{display:none}
+  .panel{display:block;flex:0 1 410px;min-width:0}
+}
+.eyebrow{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.panel h1{margin:0 0 10px;font-size:32px;line-height:1.12;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+.lede{margin:0 0 24px;font-size:15.5px;color:var(--ink-2);max-width:38ch}
+.qr-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:152px 1fr;gap:18px;align-items:center}
+.qr{width:152px;height:152px;display:grid;place-items:center}
+.qr svg{width:100%;height:100%;display:block}
+.qr-fallback{font-size:12.5px;color:var(--ink-3);margin:0;text-align:center}
+.qr-meta{min-width:0;display:flex;flex-direction:column;gap:8px}
+.qr-title{margin:0;font-size:16px;font-weight:600}
+.qr-url{margin:0;font-size:12.5px;color:var(--ink-2);word-break:break-all;user-select:all}
+.qr-actions{display:flex;flex-wrap:wrap;gap:6px}
+.btn-sm{height:32px;padding:0 10px;font-size:13px}
+.link-form{display:flex;flex-direction:column;gap:6px}
+.link-form input{height:34px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:13px;width:100%}
+.link-form .qr-actions .btn{height:30px}
+.qr-note{grid-column:1 / -1;margin:0;font-size:12.5px;color:var(--ink-2);background:var(--brand-tint);border-radius:8px;padding:10px 12px}
+.panel h2{margin:28px 0 10px;font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.try{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14.5px;color:var(--ink-2)}
+.try li{display:flex;align-items:baseline;gap:10px}
+.try li::before{content:"";flex:none;width:5px;height:5px;border-radius:50%;background:var(--ink-3);transform:translateY(-2px)}
+.try-chip{border:1px solid var(--line);background:var(--surface);border-radius:6px;height:26px;padding:0 8px;font-size:13px;font-weight:500;color:var(--brand);margin-right:2px}
+.try-chip:hover{border-color:var(--brand)}
+kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="device">
+    <div class="screen" id="screen">
+      <div class="statusbar" aria-hidden="true">
+        <span>9:41</span>
+        <span class="island"></span>
+        <span class="sb-icons">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.6 5.6 9.1a3.4 3.4 0 0 1 4.8 0z"/><path d="M3.3 6.9a6.6 6.6 0 0 1 9.4 0l-1.4 1.4a4.6 4.6 0 0 0-6.6 0z"/><path d="M1 4.6a9.9 9.9 0 0 1 14 0l-1.4 1.4a7.9 7.9 0 0 0-11.2 0z"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="currentColor"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="19" height="8" rx="1.8"/><rect x="23.5" y="4" width="1.8" height="4" rx="1" opacity=".4"/></svg>
+        </span>
+      </div>
+
+      <div class="scroller" id="scroller">
+        <header class="appbar">
+          <div class="appbar-in gutter">
+            <a class="brand" href="#" id="brandLink"><span>The Doctors</span><span>Laboratory</span></a>
+            <button class="icon-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="proto-note gutter" id="protoNote">
+          <p>Prototype with sample data. <button class="link-btn" type="button" data-try="Cal">Try searching “Cal”</button></p>
+          <button class="icon-btn" type="button" id="noteClose" aria-label="Dismiss note">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+
+        <main class="view gutter" id="listView">
+          <h1 class="page-title" tabindex="-1">All orders</h1>
+
+          <div class="filters">
+            <div class="row">
+              <div class="select-wrap">
+                <label class="sr-only" for="statusSelect">Status</label>
+                <select id="statusSelect" class="is-empty">
+                  <option value="">Select status</option>
+                  <option value="draft">Draft</option>
+                  <option value="ordered">Ordered</option>
+                  <option value="kit">Kit issued</option>
+                  <option value="partcollected">Part collected</option>
+                  <option value="collected">Collected</option>
+                  <option value="partreported">Part reported</option>
+                  <option value="reported">Reported</option>
+                </select>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <button class="btn btn-secondary" id="clearBtn" type="button" disabled>Clear</button>
+            </div>
+
+            <div class="search" id="searchWrap">
+              <form class="search-field" id="searchForm" role="search" autocomplete="off">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+                <label class="sr-only" for="searchInput">Search orders</label>
+                <input id="searchInput" type="search" placeholder="Name, order no. or test" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestList">
+                <button class="search-go" type="submit">Search</button>
+              </form>
+              <div class="suggest" id="suggest" hidden>
+                <ul role="listbox" id="suggestList" aria-label="Suggested orders"></ul>
+                <div class="suggest-foot" id="suggestFoot"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="list-meta" id="listMeta" aria-live="polite"></div>
+          <ol class="orders" id="orders"></ol>
+          <div class="more" id="more"></div>
+        </main>
+
+        <main class="view gutter" id="detailView" hidden></main>
+      </div>
+
+      <div class="scrim" id="scrim" hidden></div>
+      <aside class="drawer" id="drawer" aria-label="Menu" hidden>
+        <div class="drawer-head">
+          <span>Menu</span>
+          <button class="icon-btn" type="button" id="drawerClose" aria-label="Close menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <nav class="nav">
+          <button class="nav-item" type="button" data-soon="The catalogue">Catalogue</button>
+          <button class="nav-item is-current" type="button" aria-current="page" id="navOrders">All orders</button>
+        </nav>
+        <button class="btn btn-primary btn-block" type="button" data-soon="Creating a new order">New order
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <div class="account">
+          <span class="avatar" aria-hidden="true">AS</span>
+          <div><strong>Anna Smith</strong><span>Clinician</span></div>
+        </div>
+        <div class="drawer-note">
+          <p><strong>About this prototype.</strong> It covers the orders list and search. Every patient, order and result is sample data.</p>
+          <button class="link-btn" type="button" id="resetBtn">Reset prototype</button>
+        </div>
+      </aside>
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+  </div>
+
+  <section class="panel" aria-label="About this prototype">
+    <p class="eyebrow">Clickable prototype</p>
+    <h1>All orders on a small screen</h1>
+    <p class="lede">The clinician orders list with type-ahead search. Every patient, order and result here is sample data.</p>
+
+    <div class="qr-card">
+      <div class="qr" id="qr"></div>
+      <div class="qr-meta">
+        <p class="qr-title">Scan to try it on your phone</p>
+        <p class="qr-url" id="qrUrl"></p>
+        <div class="qr-actions" id="qrActions">
+          <button class="btn btn-secondary btn-sm" type="button" id="copyLink">Copy link</button>
+          <button class="btn btn-secondary btn-sm" type="button" id="editLink">Change link</button>
+        </div>
+        <form class="link-form" id="linkForm" hidden>
+          <label class="sr-only" for="linkInput">Link for the QR code</label>
+          <input id="linkInput" type="url" placeholder="https://…" required>
+          <div class="qr-actions">
+            <button class="btn btn-primary btn-sm" type="submit">Update QR code</button>
+            <button class="btn btn-secondary btn-sm" type="button" id="linkCancel">Cancel</button>
+            <button class="btn btn-secondary btn-sm" type="button" id="linkReset" hidden>Use default</button>
+          </div>
+        </form>
+      </div>
+      <p class="qr-note" id="qrNote" hidden></p>
+    </div>
+
+    <h2>Things to try</h2>
+    <ul class="try">
+      <li><span><button class="try-chip" type="button" data-try="Cal">Cal</button> shows suggestions as you type, best match first: names, then tests, then clinicians.</span></li>
+      <li><span><button class="try-chip" type="button" data-try="9274">9274</button> finds order numbers, with or without the dash.</span></li>
+      <li><span><button class="try-chip" type="button" data-try="liver">liver</button> searches by test name.</span></li>
+      <li><span>Press <kbd>Search</kbd> or <em>Show results</em> to filter the whole list.</span></li>
+      <li><span>Pick a status, then search within it. <em>Clear</em> resets both.</span></li>
+      <li><span>Tap any order to see its progress and tests.</span></li>
+    </ul>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* Link the QR code falls back to inside the Claude viewer. When the file is hosted anywhere else, the QR code uses that page's own address. */
+  var PUBLISHED_URL = "https://claude.ai/artifact/Mrp2j8Pk8U6yhWRZ7psBme";
+  var PAGE = 8;
+
+  var STATUS = {
+    draft:{label:"Draft", tone:"grey"},
+    ordered:{label:"Ordered", tone:"blue"},
+    kit:{label:"Kit issued", tone:"violet"},
+    partcollected:{label:"Part collected", tone:"violet"},
+    collected:{label:"Collected", tone:"blue"},
+    partreported:{label:"Part reported", tone:"amber"},
+    reported:{label:"Reported", tone:"green"}
+  };
+
+  var EXEC = ["Executive summary 1","Full blood count","U&Es","Liver function","Lipid profile","HbA1c"];
+  var EXEC_PLUS = ["Executive summary 1","Full blood count","Liver function","U&Es","Lipid profile","HbA1c","Thyroid function"];
+  var BASIC = ["Full blood count","U&Es","Liver function"];
+
+  /* Sample data, latest activity first */
+  var RAW = [
+    {id:"3108-4415", name:"Brandon Dorwart", dob:"1981-02-02", status:"reported", upd:"2026-10-29", tests:EXEC, clin:"Anna Smith", flags:{critical:"U&Es", amended:"Liver function"}},
+    {id:"5521-0938", name:"Tatiana Botosh", dob:"1968-11-23", status:"kit", upd:"2026-10-29", tests:["Thyroid function","Vitamin D","Ferritin"], clin:"Anna Smith"},
+    {id:"6604-1872", name:"Louise Allan", dob:"1987-04-14", status:"partreported", upd:"2026-10-28", tests:EXEC, clin:"Anna Smith", flags:{critical:"Full blood count"}},
+    {id:"7012-3349", name:"Aaron Thea", dob:"1993-06-04", status:"ordered", upd:"2026-10-28", tests:["Lipid profile","HbA1c"], clin:"Anna Smith"},
+    {id:"4417-2286", name:"George Cody", dob:"2004-02-22", status:"ordered", upd:"2026-10-27", tests:EXEC_PLUS, clin:"Anna Smith"},
+    {id:"2290-6613", name:"Ryder Wesley", dob:"1976-09-17", status:"collected", upd:"2026-10-27", tests:BASIC, clin:"Anna Smith"},
+    {id:"8835-1204", name:"Yasmine Reese", dob:"2014-01-11", status:"partcollected", upd:"2026-10-26", tests:EXEC_PLUS, clin:"Anna Smith"},
+    {id:"1176-5390", name:"Preston Brianna", dob:"1996-03-30", status:"reported", upd:"2026-10-26", tests:BASIC, clin:"Anna Smith", flags:{amended:"U&Es"}},
+    {id:null, name:null, dob:null, status:"draft", upd:"2026-10-25", tests:["Full blood count"], clin:"Anna Smith"},
+    {id:"6649-7720", name:"Jasmine Dylan", dob:"1952-08-05", status:"partreported", upd:"2026-10-24", tests:BASIC, clin:"Anna Smith"},
+    {id:"1234-5678", name:"Callum Smith", dob:"1975-11-22", status:"reported", upd:"2026-10-23", tests:EXEC, clin:"Anna Smith"},
+    {id:"1984-5672", name:"Caleb Evans", dob:"1997-04-14", status:"kit", upd:"2026-10-22", tests:EXEC, clin:"Anna Smith"},
+    {id:"2785-9274", name:"Matilda Price", dob:"2010-05-19", status:"collected", upd:"2026-10-22", tests:["Calprotectin","Full blood count","CRP","Ferritin","Iron studies","Coeliac screen"], clin:"Anna Smith"},
+    {id:"9274-2785", name:"Tom Hopkins", dob:"2010-05-19", status:"partreported", upd:"2026-10-21", tests:["Calprotectin","QFIT profile (combined)","Full blood count","CRP","Ferritin","Coeliac screen"], clin:"Anna Smith"},
+    {id:"4785-9274", name:"Oliver Hughes", dob:"2002-09-28", status:"reported", upd:"2026-10-20", tests:EXEC, clin:"Callum Abrey"},
+    {id:"3361-8057", name:"Imogen Shaw", dob:"1989-12-03", status:"collected", upd:"2026-10-20", tests:["Iron studies","Ferritin","Vitamin B12","Full blood count"], clin:"Anna Smith"},
+    {id:"5098-2463", name:"Hannah Wright", dob:"1979-07-08", status:"ordered", upd:"2026-10-19", tests:["Thyroid function","Vitamin D"], clin:"Callum Abrey"},
+    {id:"7745-0316", name:"Pascal Moreau", dob:"1964-10-15", status:"reported", upd:"2026-10-17", tests:["PSA","U&Es","Liver function","Lipid profile"], clin:"Anna Smith", flags:{critical:"U&Es"}},
+    {id:"2603-9981", name:"Samuel Okoro", dob:"1958-03-27", status:"partcollected", upd:"2026-10-16", tests:["Full blood count","U&Es","Bone profile","Vitamin D"], clin:"Anna Smith"},
+    {id:"8120-4475", name:"Neve Mascall", dob:"2001-06-30", status:"kit", upd:"2026-10-15", tests:["Full blood count","Ferritin"], clin:"Anna Smith"},
+    {id:"4932-6608", name:"Ethan Clarke", dob:"1990-01-14", status:"collected", upd:"2026-10-14", tests:["Faecal elastase","Coeliac screen","Full blood count"], clin:"Anna Smith"},
+    {id:"6278-1149", name:"Ruby Patel", dob:"1985-08-21", status:"reported", upd:"2026-10-13", tests:["Faecal occult blood","Iron studies","Full blood count"], clin:"Anna Smith"},
+    {id:"3850-7726", name:"Leo Grant", dob:"1972-05-09", status:"partreported", upd:"2026-10-10", tests:["Lipid profile","HbA1c","Liver function","U&Es"], clin:"Ivan Escalante"},
+    {id:"9417-3062", name:"Amelia Ross", dob:"1999-11-02", status:"reported", upd:"2026-10-08", tests:["Thyroid function","Ferritin","Vitamin D"], clin:"Ivan Escalante"}
+  ];
+
+  /* ---------- Dates ---------- */
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  function parse(iso){ var p = iso.split("-").map(Number); return new Date(Date.UTC(p[0], p[1]-1, p[2])); }
+  function fmt(iso){ var d = parse(iso); return String(d.getUTCDate()).padStart(2,"0") + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear(); }
+  function add(iso, n){ var d = parse(iso); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+
+  var ORDERS = RAW.map(function(r, i){
+    var o = Object.assign({}, r);
+    o.idx = i;
+    o.key = r.id ? r.id.replace(/\D/g,"") : "draft";
+    o.digits = r.id ? r.id.replace(/\D/g,"") : "";
+    o.dobText = r.dob ? fmt(r.dob) : "";
+    o.flags = r.flags || {};
+    var u = r.upd, d = {};
+    switch (r.status){
+      case "draft": d.edited = u; break;
+      case "ordered": d.ordered = u; break;
+      case "kit": d.ordered = add(u,-1); d.kit = u; break;
+      case "partcollected": case "collected": d.ordered = add(u,-3); d.kit = add(u,-3); d.collected = u; break;
+      default: d.ordered = add(u,-5); d.kit = add(u,-5); d.collected = add(u,-3); d.reported = u;
+    }
+    o.dates = d;
+    return o;
+  });
+
+  function lastEvent(o){
+    var verb = {draft:"Edited", ordered:"Ordered", kit:"Kit issued", partcollected:"Part collected", collected:"Collected", partreported:"Part reported", reported:"Reported"}[o.status];
+    return verb + " " + fmt(o.upd);
+  }
+
+  /* ---------- Search ---------- */
+  function tokenize(q){ return q.toLowerCase().trim().split(/\s+/).filter(Boolean); }
+  function isWordStart(s, i){ return i === 0 || !/[a-z0-9]/.test(s[i-1]); }
+  function fieldScore(text, t, ws, mid){
+    if (!text) return 0;
+    var s = text.toLowerCase(), i = s.indexOf(t), best = 0;
+    while (i >= 0){
+      if (isWordStart(s, i)) return ws;
+      if (t.length >= 3) best = mid;
+      i = s.indexOf(t, i+1);
+    }
+    return best;
+  }
+  function idScore(o, t){
+    var dt = t.replace(/[\s-]/g,"");
+    if (!o.digits || !/^\d+$/.test(dt)) return 0;
+    var i = o.digits.indexOf(dt), best = 0;
+    while (i >= 0){
+      if (i === 0 || i === 4) return 90;
+      if (dt.length >= 3) best = 45;
+      i = o.digits.indexOf(dt, i+1);
+    }
+    return best;
+  }
+  function match(o, tokens){
+    var total = 0, testIdx = -1, testBest = 0;
+    for (var k = 0; k < tokens.length; k++){
+      var t = tokens[k], best = 0;
+      best = Math.max(best, fieldScore(o.name, t, 100, 40));
+      best = Math.max(best, idScore(o, t));
+      for (var j = 0; j < o.tests.length; j++){
+        var s = fieldScore(o.tests[j], t, 80, 30);
+        if (s > best) best = s;
+        if (s > testBest){ testBest = s; testIdx = j; }
+      }
+      best = Math.max(best, fieldScore(o.clin, t, 70, 20));
+      best = Math.max(best, fieldScore(o.dobText, t, 50, 0));
+      if (!best) return null;
+      total += best;
+    }
+    return {o:o, score:total, testIdx:testIdx};
+  }
+  function run(query, status){
+    var tokens = tokenize(query);
+    var pool = ORDERS.filter(function(o){ return !status || o.status === status; });
+    if (!tokens.length) return pool.map(function(o){ return {o:o, score:0, testIdx:-1}; });
+    return pool.map(function(o){ return match(o, tokens); }).filter(Boolean).sort(function(a, b){
+      return (b.score - a.score) || (a.o.upd < b.o.upd ? 1 : a.o.upd > b.o.upd ? -1 : 0) || (a.o.idx - b.o.idx);
+    });
+  }
+
+  /* ---------- Highlighting ---------- */
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function paint(text, rs){
+    if (!rs.length) return esc(text);
+    rs.sort(function(a,b){ return a[0]-b[0]; });
+    var m = [];
+    rs.forEach(function(r){
+      var last = m[m.length-1];
+      if (last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]); else m.push([r[0], r[1]]);
+    });
+    var h = "", p = 0;
+    m.forEach(function(r){ h += esc(text.slice(p, r[0])) + "<mark>" + esc(text.slice(r[0], r[1])) + "</mark>"; p = r[1]; });
+    return h + esc(text.slice(p));
+  }
+  function hl(text, tokens, allowMid){
+    if (allowMid === undefined) allowMid = true;
+    if (!tokens || !tokens.length) return esc(text);
+    var s = text.toLowerCase(), rs = [];
+    tokens.forEach(function(t){
+      var i = s.indexOf(t);
+      while (i >= 0){
+        if (isWordStart(s, i) || (allowMid && t.length >= 3)) rs.push([i, i + t.length]);
+        i = s.indexOf(t, i+1);
+      }
+    });
+    return paint(text, rs);
+  }
+  function hlId(o, tokens){
+    var id = o.id;
+    if (!tokens || !tokens.length) return esc(id);
+    var map = [];
+    for (var i = 0; i < id.length; i++) if (/\d/.test(id[i])) map.push(i);
+    var rs = [];
+    tokens.forEach(function(t){
+      var dt = t.replace(/[\s-]/g,"");
+      if (!/^\d+$/.test(dt)) return;
+      var k = o.digits.indexOf(dt);
+      while (k >= 0){
+        if (k === 0 || k === 4 || dt.length >= 3) rs.push([map[k], map[k + dt.length - 1] + 1]);
+        k = o.digits.indexOf(dt, k+1);
+      }
+    });
+    return paint(id, rs);
+  }
+
+  /* ---------- Fragments ---------- */
+  function pill(st){ var s = STATUS[st]; return '<span class="pill tone-' + s.tone + '">' + s.label + '</span>'; }
+  function flagChips(o){
+    var h = "";
+    if (o.flags.critical) h += '<span class="flag flag-critical">Contains critical</span>';
+    if (o.flags.amended) h += '<span class="flag flag-amended">Contains amended</span>';
+    return h ? '<div class="flags">' + h + '</div>' : "";
+  }
+  function testsOrdered(o, testIdx){
+    if (testIdx > 0){ var a = o.tests.slice(); var t = a.splice(testIdx, 1)[0]; a.unshift(t); return a; }
+    return o.tests;
+  }
+  function testsShort(o, testIdx, tokens){
+    var a = testsOrdered(o, testIdx), more = a.length - 1;
+    return hl(a[0], tokens) + (more > 0 ? ' <span class="more-n">+ ' + more + ' more</span>' : "");
+  }
+  function testsLine(o, testIdx, tokens){
+    var a = testsOrdered(o, testIdx), more = a.length - 3;
+    var sep = '<span class="sep"> | </span>';
+    return a.slice(0,3).map(function(t){ return hl(t, tokens); }).join(sep) + (more > 0 ? sep + '<span class="more-n">+' + more + ' more</span>' : "");
+  }
+
+  /* ---------- Elements + state ---------- */
+  var $ = function(id){ return document.getElementById(id); };
+  var input = $("searchInput"), form = $("searchForm"), suggest = $("suggest"), sList = $("suggestList"), sFoot = $("suggestFoot");
+  var statusSel = $("statusSelect"), clearBtn = $("clearBtn"), searchWrap = $("searchWrap");
+  var listView = $("listView"), detailView = $("detailView"), ordersEl = $("orders"), metaEl = $("listMeta"), moreEl = $("more");
+  var scroller = $("scroller"), drawer = $("drawer"), scrim = $("scrim"), toastEl = $("toast"), menuBtn = $("menuBtn");
+  var DESK = window.matchMedia("(min-width:860px) and (min-height:640px)");
+  var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  var state = { status:"", applied:"", shown:PAGE, active:-1, suggest:[], total:0, listScroll:0 };
+
+  function getScroll(){ return DESK.matches ? scroller.scrollTop : window.scrollY; }
+  function setScroll(y){ if (DESK.matches) scroller.scrollTop = y; else window.scrollTo(0, y); }
+
+  /* ---------- Suggestions ---------- */
+  function optHtml(r, i, tokens){
+    var o = r.o;
+    var top = '<div class="opt-top"><span class="opt-id">' + (o.id ? hlId(o, tokens) : "Draft order") + '</span>' + pill(o.status) + '</div>';
+    var sub = '<div class="opt-sub">' + (o.status === "draft" ? "Last edited " + fmt(o.upd) : "Order date: " + fmt(o.dates.ordered)) + '</div>';
+    var who = o.name
+      ? '<span class="opt-name">' + hl(o.name, tokens) + '</span><span class="dot">•</span>Date of birth: ' + hl(o.dobText, tokens, false)
+      : '<span class="opt-name">No patient added</span>';
+    var tests = '<div class="opt-sub">' + testsShort(o, r.testIdx, tokens) + '<span class="dot">•</span>Requesting clinician: ' + hl(o.clin, tokens) + '</div>';
+    return '<li role="option" id="opt-' + i + '" class="opt' + (i === state.active ? " is-active" : "") + '" aria-selected="' + (i === state.active) + '" data-key="' + o.key + '">' + top + sub + '<div class="opt-line">' + who + '</div>' + tests + '</li>';
+  }
+  function renderSuggest(){
+    var q = input.value.trim();
+    if (q.length < 2){ closeSuggest(); return; }
+    var tokens = tokenize(q);
+    var res = run(q, state.status);
+    state.suggest = res.slice(0, 5);
+    state.total = res.length;
+    if (state.active >= state.suggest.length) state.active = -1;
+    sList.innerHTML = state.suggest.map(function(r, i){ return optHtml(r, i, tokens); }).join("");
+    sList.hidden = !state.suggest.length;
+    var n = state.total, s = state.suggest.length, inStatus = state.status ? " in " + STATUS[state.status].label : "";
+    if (!n){
+      sFoot.innerHTML = '<p class="foot-empty"><strong>No orders match “' + esc(q) + '”' + inStatus + '</strong>Try a patient name, order number, date of birth or test.</p>';
+    } else {
+      var line = n > s ? "Showing " + s + " of " + n + inStatus + ". Keep typing to narrow down." : (n === 1 ? "1 match" : "All " + n + " matches") + inStatus + ".";
+      sFoot.innerHTML = '<p>' + line + '</p><button type="button" class="btn btn-secondary btn-block" id="showAll">Show ' + n + ' result' + (n === 1 ? "" : "s") + '</button>';
+    }
+    suggest.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    if (state.active >= 0) input.setAttribute("aria-activedescendant", "opt-" + state.active); else input.removeAttribute("aria-activedescendant");
+  }
+  function closeSuggest(){
+    suggest.hidden = true;
+    state.active = -1;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+  }
+  function moveActive(dir){
+    if (suggest.hidden || !state.suggest.length) return;
+    var n = state.suggest.length;
+    state.active = state.active < 0 ? (dir > 0 ? 0 : n - 1) : (state.active + dir + n) % n;
+    renderSuggest();
+    var el = $("opt-" + state.active);
+    if (el) el.scrollIntoView({block:"nearest"});
+  }
+
+  /* ---------- List ---------- */
+  function cardHtml(r, tokens){
+    var o = r.o;
+    var name = o.name ? hl(o.name, tokens) : "Draft order";
+    var meta = o.name ? hl(o.dobText, tokens, false) + '<span class="dot">·</span>' + hlId(o, tokens) : "No patient added yet";
+    return '<li><a class="card" href="#order-' + o.key + '">' +
+      '<div class="card-top"><span class="card-name">' + name + '</span>' + pill(o.status) + '</div>' +
+      '<div class="card-meta">' + meta + '</div>' +
+      '<div class="card-tests">' + testsLine(o, r.testIdx, tokens) + '</div>' +
+      flagChips(o) +
+      '<div class="card-foot"><span>' + lastEvent(o) + '</span><span>Requested by ' + hl(o.clin, tokens) + '</span></div>' +
+      '</a></li>';
+  }
+  function renderList(){
+    var tokens = tokenize(state.applied);
+    var res = run(state.applied, state.status);
+    var total = res.length, shown = res.slice(0, state.shown);
+    var label, plural = total === 1 ? "" : "s";
+    if (state.applied){
+      label = '<span><strong>' + total + '</strong> result' + plural + ' for “' + esc(state.applied) + '”' + (state.status ? " in " + STATUS[state.status].label : "") + '</span><button type="button" class="link-btn" data-clear-search>Clear search</button>';
+    } else if (state.status){
+      label = '<span><strong>' + total + '</strong> ' + STATUS[state.status].label.toLowerCase() + ' order' + plural + '</span>';
+    } else {
+      label = '<span><strong>' + total + '</strong> orders · latest activity first</span>';
+    }
+    metaEl.innerHTML = label;
+    if (!total){
+      ordersEl.innerHTML = '<li class="empty"><p class="empty-title">No orders match “' + esc(state.applied) + '”' + (state.status ? " in " + STATUS[state.status].label : "") + '</p><p>Check the spelling, or search by patient name, order number, date of birth or test.</p><button type="button" class="btn btn-secondary" data-clear-search>Clear search</button></li>';
+      moreEl.innerHTML = "";
+    } else {
+      ordersEl.innerHTML = shown.map(function(r){ return cardHtml(r, tokens); }).join("");
+      moreEl.innerHTML = shown.length < total
+        ? '<p class="more-count">Showing ' + shown.length + ' of ' + total + '</p><button type="button" class="btn btn-secondary btn-block" id="loadMore">Load more</button>'
+        : '<p class="more-count">Showing all ' + total + '</p>';
+    }
+    updateClear();
+  }
+  function updateClear(){ clearBtn.disabled = !(state.status || state.applied || input.value.trim()); }
+
+  function apply(){
+    state.applied = input.value.trim();
+    state.shown = PAGE;
+    closeSuggest();
+    input.blur();
+    renderList();
+  }
+  function clearSearch(){
+    input.value = ""; state.applied = ""; state.shown = PAGE;
+    closeSuggest(); renderList();
+  }
+  function clearAll(){
+    statusSel.value = ""; statusSel.classList.add("is-empty"); state.status = "";
+    clearSearch();
+  }
+
+  /* ---------- Detail ---------- */
+  function renderDetail(o){
+    var n = o.tests.length, half = Math.ceil(n / 2);
+    var reach = {draft:-1, ordered:0, kit:1, partcollected:2, collected:2, partreported:3, reported:3}[o.status];
+    var partialAt = {partcollected:2, partreported:3}[o.status];
+    var steps = [["ordered","Ordered"],["kit","Kit issued"],["collected","Sample collected"],["reported","Results reported"]];
+    var check = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+    var stepsHtml = steps.map(function(s, i){
+      var cls = i < reach || (i === reach && i !== partialAt) ? "is-done" : i === partialAt ? "is-partial" : "is-pending";
+      var when = o.dates[s[0]] ? fmt(o.dates[s[0]]) : "Pending";
+      var note = "";
+      if (cls === "is-partial") note = '<span class="step-note">' + (s[0] === "collected" ? "Some samples received, others outstanding" : half + " of " + n + " tests reported") + '</span>';
+      return '<li class="step ' + cls + '"><span class="step-mark">' + (cls === "is-done" ? check : "") + '</span><div class="step-body"><span class="step-label">' + s[1] + '</span><span class="step-when">' + when + '</span>' + note + '</div></li>';
+    }).join("");
+
+    function testStatus(j){
+      switch (o.status){
+        case "draft": return ["Not submitted","grey"];
+        case "ordered": case "kit": return ["Awaiting sample","grey"];
+        case "partcollected": return j < half ? ["In progress","blue"] : ["Awaiting sample","grey"];
+        case "collected": return ["In progress","blue"];
+        case "partreported": return j < half ? ["Reported","green"] : ["In progress","blue"];
+        default: return ["Reported","green"];
+      }
+    }
+    var testsHtml = o.tests.map(function(t, j){
+      var st = testStatus(j), tags = "";
+      if (st[0] === "Reported" && o.flags.critical === t) tags += '<span class="flag flag-critical">Critical</span>';
+      if (st[0] === "Reported" && o.flags.amended === t) tags += '<span class="flag flag-amended">Amended</span>';
+      return '<li><span class="test-name">' + esc(t) + tags + '</span><span class="ts ts-' + st[1] + '">' + st[0] + '</span></li>';
+    }).join("");
+
+    var isDraft = o.status === "draft";
+    var title = isDraft ? "Draft order" : esc(o.name);
+    var sub = isDraft ? "Not yet submitted · Last edited " + fmt(o.upd) : "Order " + o.id + " · Requested by " + esc(o.clin);
+    var patient = isDraft
+      ? '<p style="margin:0;color:var(--ink-2)">No patient added yet.</p>'
+      : '<dl class="kv"><div><dt>Date of birth</dt><dd>' + o.dobText + '</dd></div><div><dt>Order number</dt><dd>' + o.id + '</dd></div><div><dt>Order date</dt><dd>' + fmt(o.dates.ordered) + '</dd></div><div><dt>Requested by</dt><dd>' + esc(o.clin) + '</dd></div></dl>';
+    var action = "";
+    if (isDraft) action = '<button type="button" class="btn btn-primary btn-block" data-soon="Editing drafts">Continue draft</button>';
+    else if (o.status === "reported" || o.status === "partreported") action = '<button type="button" class="btn btn-primary btn-block" data-soon="The report viewer">View report</button>';
+
+    detailView.innerHTML =
+      '<a class="back" href="#" data-back><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>All orders</a>' +
+      '<div class="detail-head"><h1 class="page-title" tabindex="-1">' + title + '</h1>' + pill(o.status) + '</div>' +
+      '<p class="detail-sub">' + sub + '</p>' + flagChips(o) +
+      '<section class="section"><h2>Patient</h2>' + patient + '</section>' +
+      '<section class="section"><h2>Progress</h2><ol class="steps">' + stepsHtml + '</ol></section>' +
+      '<section class="section"><h2>Tests <span class="count">' + n + '</span></h2><ul class="tests">' + testsHtml + '</ul></section>' +
+      (action ? '<div class="detail-actions">' + action + '</div>' : "");
+  }
+
+  /* ---------- Routing ---------- */
+  function route(){
+    var h = location.hash.replace(/^#/, "");
+    var m = /^order-([a-z0-9]+)$/.exec(h);
+    var o = m && ORDERS.find(function(x){ return x.key === m[1]; });
+    if (o){
+      if (!listView.hidden) state.listScroll = getScroll();
+      closeSuggest(); closeDrawer(true);
+      listView.hidden = true; detailView.hidden = false;
+      renderDetail(o);
+      setScroll(0);
+      var h1 = detailView.querySelector("h1"); if (h1) h1.focus({preventScroll:true});
+    } else if (listView.hidden){
+      detailView.hidden = true; listView.hidden = false;
+      renderList();
+      requestAnimationFrame(function(){ setScroll(state.listScroll); });
+    }
+  }
+  function goList(){ if (location.hash && location.hash !== "#") location.hash = ""; else route(); }
+
+  /* ---------- Drawer + toast ---------- */
+  function openDrawer(){
+    scrim.hidden = false; drawer.hidden = false;
+    menuBtn.setAttribute("aria-expanded","true");
+    lockScroll(true);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ scrim.classList.add("open"); drawer.classList.add("open"); $("drawerClose").focus(); }); });
+  }
+  function closeDrawer(instant){
+    if (drawer.hidden) return;
+    scrim.classList.remove("open"); drawer.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded","false");
+    lockScroll(false);
+    var done = function(){ scrim.hidden = true; drawer.hidden = true; };
+    if (instant || REDUCE.matches) done(); else setTimeout(done, 240);
+  }
+  function lockScroll(on){
+    scroller.classList.toggle("is-locked", on);
+    if (!DESK.matches) document.documentElement.style.overflow = on ? "hidden" : "";
+  }
+  var toastTimer;
+  function toast(msg){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    requestAnimationFrame(function(){ toastEl.classList.add("open"); });
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("open"); setTimeout(function(){ toastEl.hidden = true; }, 200); }, 2600);
+  }
+
+  /* ---------- Guided typing (panel + note) ---------- */
+  var typingTimer;
+  function typeInto(text){
+    clearInterval(typingTimer);
+    closeDrawer(true);
+    if (!detailView.hidden) goList();
+    input.value = ""; state.applied = ""; state.shown = PAGE;
+    renderList(); closeSuggest();
+    setScroll(0);
+    input.focus({preventScroll:true});
+    if (REDUCE.matches){ input.value = text; onInput(); return; }
+    var i = 0;
+    typingTimer = setInterval(function(){
+      input.value = text.slice(0, ++i); onInput();
+      if (i >= text.length) clearInterval(typingTimer);
+    }, 140);
+  }
+
+  /* ---------- Events ---------- */
+  function onInput(){
+    state.active = -1;
+    if (!input.value.trim() && state.applied){ state.applied = ""; state.shown = PAGE; renderList(); }
+    renderSuggest();
+    updateClear();
+  }
+  input.addEventListener("input", onInput);
+  input.addEventListener("focus", function(){ if (input.value.trim().length >= 2) renderSuggest(); });
+  input.addEventListener("keydown", function(e){
+    if (e.key === "ArrowDown"){ e.preventDefault(); if (suggest.hidden) renderSuggest(); else moveActive(1); }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); moveActive(-1); }
+    else if (e.key === "Escape"){ if (!suggest.hidden){ e.preventDefault(); closeSuggest(); } }
+  });
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!suggest.hidden && state.active >= 0 && state.suggest[state.active]) openOrder(state.suggest[state.active].o);
+    else apply();
+  });
+  sList.addEventListener("click", function(e){
+    var li = e.target.closest(".opt"); if (!li) return;
+    var o = ORDERS.find(function(x){ return x.key === li.dataset.key; });
+    if (o) openOrder(o);
+  });
+  sFoot.addEventListener("click", function(e){ if (e.target.closest("#showAll")) apply(); });
+
+  function openOrder(o){
+    state.listScroll = getScroll();
+    closeSuggest(); input.blur();
+    location.hash = "order-" + o.key;
+  }
+
+  /* Tapping outside the suggestions closes them without also opening whatever was underneath */
+  var swallowUntil = 0;
+  document.addEventListener("pointerdown", function(e){
+    if (suggest.hidden || searchWrap.contains(e.target)) return;
+    closeSuggest();
+    if (ordersEl.contains(e.target) || moreEl.contains(e.target) || metaEl.contains(e.target)) swallowUntil = Date.now() + 700;
+  });
+  document.addEventListener("click", function(e){
+    if (Date.now() < swallowUntil && !searchWrap.contains(e.target)){ e.preventDefault(); e.stopPropagation(); swallowUntil = 0; }
+  }, true);
+
+  statusSel.addEventListener("change", function(){
+    state.status = statusSel.value;
+    statusSel.classList.toggle("is-empty", !state.status);
+    state.shown = PAGE;
+    renderList();
+    if (!suggest.hidden) renderSuggest();
+  });
+  clearBtn.addEventListener("click", function(){ clearAll(); });
+
+  document.addEventListener("click", function(e){
+    var t;
+    if ((t = e.target.closest("[data-clear-search]"))){ clearSearch(); input.focus({preventScroll:true}); return; }
+    if ((t = e.target.closest("#loadMore"))){
+      t.disabled = true; t.textContent = "Loading…";
+      setTimeout(function(){ state.shown += PAGE; renderList(); }, 380);
+      return;
+    }
+    if ((t = e.target.closest("[data-back]"))){ e.preventDefault(); goList(); return; }
+    if ((t = e.target.closest("[data-soon]"))){ closeDrawer(); toast(t.dataset.soon + " isn’t part of this prototype"); return; }
+    if ((t = e.target.closest("[data-try]"))){ typeInto(t.dataset.try); return; }
+  });
+
+  $("brandLink").addEventListener("click", function(e){ e.preventDefault(); closeDrawer(true); goList(); setScroll(0); });
+  menuBtn.addEventListener("click", openDrawer);
+  $("drawerClose").addEventListener("click", function(){ closeDrawer(); menuBtn.focus(); });
+  scrim.addEventListener("click", function(){ closeDrawer(); });
+  $("navOrders").addEventListener("click", function(){ closeDrawer(); goList(); setScroll(0); });
+  $("resetBtn").addEventListener("click", function(){
+    closeDrawer(true); clearAll(); state.listScroll = 0; goList(); setScroll(0); toast("Prototype reset");
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !drawer.hidden){ closeDrawer(); menuBtn.focus(); } });
+  window.addEventListener("hashchange", route);
+
+  /* Phone note */
+  var NOTE_KEY = "orders-proto-note-dismissed";
+  try { if (localStorage.getItem(NOTE_KEY)) $("protoNote").hidden = true; } catch (err) {}
+  $("noteClose").addEventListener("click", function(){
+    $("protoNote").hidden = true;
+    try { localStorage.setItem(NOTE_KEY, "1"); } catch (err) {}
+  });
+
+  /* ---------- QR code ---------- */
+  var LINK_KEY = "orders-proto-share-link";
+  function defaultLink(){
+    var framed = true;
+    try { framed = window.self !== window.top; } catch (err) {}
+    var web = /^https?:$/.test(location.protocol);
+    if (!framed && web) return location.href.split("#")[0];
+    return PUBLISHED_URL || (web ? location.href.split("#")[0] : "");
+  }
+  function storedLink(){ try { return localStorage.getItem(LINK_KEY) || ""; } catch (err) { return ""; } }
+  function currentLink(){ return storedLink() || defaultLink(); }
+  function drawQR(){
+    var url = currentLink(), box = $("qr"), note = $("qrNote");
+    $("qrUrl").textContent = url || "No link yet";
+    $("linkReset").hidden = !storedLink();
+    if (!url){
+      box.innerHTML = '<p class="qr-fallback">Add a link to make a QR code</p>';
+    } else if (typeof window.qrcode !== "function"){
+      box.innerHTML = '<p class="qr-fallback">QR code couldn’t load. Share the link instead.</p>';
+    } else {
+      var q = window.qrcode(0, "M"); q.addData(url); q.make();
+      var n = q.getModuleCount(), d = "";
+      for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += "M" + c + " " + r + "h1v1h-1z";
+      box.innerHTML = '<svg viewBox="-2 -2 ' + (n + 4) + ' ' + (n + 4) + '" shape-rendering="crispEdges" role="img" aria-label="QR code that opens this prototype"><rect x="-2" y="-2" width="' + (n + 4) + '" height="' + (n + 4) + '" fill="#FFFFFF"/><path d="' + d + '" fill="#111318"/></svg>';
+    }
+    if (/^https:\/\/claude\.ai\//.test(url)){
+      note.textContent = "Opening this link needs a Claude sign-in. To share with people who don’t have an account, put this prototype file on any public website: the QR code then points there automatically.";
+      note.hidden = false;
+    } else if (!url){
+      note.textContent = "Open this file from a web address, or paste the address where it’s hosted, to get a QR code.";
+      note.hidden = false;
+    } else note.hidden = true;
+  }
+  $("copyLink").addEventListener("click", function(){
+    var btn = this, url = currentLink();
+    function fallback(){
+      var range = document.createRange(); range.selectNodeContents($("qrUrl"));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      btn.textContent = "Link selected, copy it";
+    }
+    try {
+      navigator.clipboard.writeText(url).then(function(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy link"; }, 1600); }, fallback);
+    } catch (err) { fallback(); }
+  });
+  $("editLink").addEventListener("click", function(){
+    $("linkInput").value = currentLink();
+    $("linkForm").hidden = false; $("qrActions").hidden = true;
+    $("linkInput").focus(); $("linkInput").select();
+  });
+  function closeLinkForm(){ $("linkForm").hidden = true; $("qrActions").hidden = false; }
+  $("linkCancel").addEventListener("click", closeLinkForm);
+  $("linkReset").addEventListener("click", function(){ try { localStorage.removeItem(LINK_KEY); } catch (err) {} closeLinkForm(); drawQR(); });
+  $("linkForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = $("linkInput").value.trim();
+    if (!/^https?:\/\//i.test(v)){ $("linkInput").setCustomValidity("Enter a full web address starting with https://"); $("linkInput").reportValidity(); return; }
+    $("linkInput").setCustomValidity("");
+    try { if (v === defaultLink()) localStorage.removeItem(LINK_KEY); else localStorage.setItem(LINK_KEY, v); } catch (err) {}
+    closeLinkForm(); drawQR();
+  });
+  $("linkInput").addEventListener("input", function(){ this.setCustomValidity(""); });
+
+  /* ---------- Start ---------- */
+  renderList();
+  route();
+  drawQR();
+})();
+</script>
+</body>
+</html>
