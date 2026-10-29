@@ -383,9 +383,7 @@ kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-botto
       <li><span><button class="try-chip" type="button" data-try="9274">9274</button> finds order numbers, with or without the dash.</span></li>
       <li><span><button class="try-chip" type="button" data-try="liver">liver</button> searches by test name.</span></li>
       <li><span>Press <kbd>Search</kbd> or <em>Show results</em> to filter the whole list.</span></li>
-      <li><span>Pick a status, then search within it. <em>Clear</em> resets both.</span></li>
-      <li><span>Tap a suggestion to open that order.</span></li>
-    </ul>
+      <li><span>Pick a status, then search within it. <em>Clear</em> resets both.</span></li>    </ul>
   </section>
 </div>
 
@@ -758,9 +756,7 @@ kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-botto
 
   /* ---------- Routing ---------- */
   function route(){
-    var h = location.hash.replace(/^#/, "");
-    var m = /^order-([a-z0-9]+)$/.exec(h);
-    var o = m && ORDERS.find(function(x){ return x.key === m[1]; });
+    var o = null; /* Order record page switched off until it's designed: every address shows the list */
     if (o){
       if (!listView.hidden) state.listScroll = getScroll();
       closeSuggest(); closeDrawer(true);
@@ -848,10 +844,9 @@ kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-botto
   });
   sFoot.addEventListener("click", function(e){ if (e.target.closest("#showAll")) apply(); });
 
+  /* The order record page isn't designed yet, so choosing a suggestion only explains that */
   function openOrder(o){
-    state.listScroll = getScroll();
-    closeSuggest(); input.blur();
-    location.hash = "order-" + o.key;
+    toast("The order record isn’t designed yet");
   }
 
   /* Tapping outside the suggestions closes them without also opening whatever was underneath */
